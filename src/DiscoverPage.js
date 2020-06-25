@@ -3,11 +3,31 @@ import { Link } from "react-router-dom";
 import { fetchMovies, searchMovies } from "./moviesApi";
 import Loading from "./Loading";
 
-function MovieItem({ movie: { id, original_title, vote_average } }) {
+function MovieItem({ movie: { id, title, vote_average, backdrop_path } }) {
   return (
     <Link to={`/movies/${id}`}>
-      <h2>{original_title}</h2>
-      <p>{vote_average}</p>
+      <div
+        className="relative"
+        style={{
+          width: "400px",
+          height: "200px",
+          backgroundImage: `url(https://image.tmdb.org/t/p/w400/${backdrop_path})`,
+        }}
+      >
+        <div className="absolute inset-x-0 bottom-0 bg-gray-700 bg-opacity-75 p-2">
+          <h2
+            className="text-gray-100"
+            style={{
+              textOverflow: "ellipsis",
+              maxHeight: "72px",
+              overflow: "hidden",
+            }}
+          >
+            {title}
+          </h2>
+          <p className="text-white font-bold">{vote_average}</p>
+        </div>
+      </div>
     </Link>
   );
 }
@@ -24,9 +44,18 @@ function SearchBar({ onSearch }) {
   };
 
   return (
-    <div>
+    <div className="p-2">
       <form onSubmit={handleSubmit}>
-        <input type="search" value={query} onChange={handleChange} />
+        <label className="p-2" htmlFor="search-input">
+          Search movies:
+        </label>
+        <input
+          id="search-input"
+          className="rounded-md pl-1 pr-1"
+          type="text"
+          value={query}
+          onChange={handleChange}
+        />
       </form>
     </div>
   );
@@ -50,9 +79,16 @@ function StarFilter({ starFilter, onFilter }) {
   return (
     <div>
       {oneToFive.map((star) => (
-        <span key={star} onClick={() => selectStar(star)}>
+        <button
+          className="mr-1"
+          style={{
+            outline: "none",
+          }}
+          key={star}
+          onClick={() => selectStar(star)}
+        >
           {stars >= star ? starOn : starOff}
-        </span>
+        </button>
       ))}
     </div>
   );
@@ -101,17 +137,24 @@ function DiscoverPage() {
 
   return (
     <div>
-      <SearchBar onSearch={handleSearch} />
-      <StarFilter starFilter={currentStarFilter} onFilter={setCurrentFilter} />
+      <div className="bg-gray-300 flex items-center">
+        <SearchBar onSearch={handleSearch} />
+        <StarFilter
+          starFilter={currentStarFilter}
+          onFilter={setCurrentFilter}
+        />
+      </div>
       {loading ? (
         <Loading />
       ) : (
-        <div>
+        <>
           {filteredMovies.length === 0 && <div>No movies found</div>}
-          {filteredMovies.map((movie) => (
-            <MovieItem key={movie.id} movie={movie} />
-          ))}
-        </div>
+          <div className="flex flex-wrap">
+            {filteredMovies.map((movie) => (
+              <MovieItem key={movie.id} movie={movie} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
